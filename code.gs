@@ -96,14 +96,14 @@ function checkAtCoderContests() {
 }
 
 function parseUpcomingContests_(html) {
-  const section = html.match(/id=["']contest-table-upcoming["'][\\s\\S]*?<\\/table>/i);
+  const section = html.match(/id=["']contest-table-upcoming["'][\s\S]*?<\/table>/i);
   if (!section) throw new Error("Upcoming contest table not found. AtCoder HTML may have changed.");
 
-  const rows = section[0].match(/<tr\\b[^>]*>[\\s\\S]*?<\\/tr>/gi) || [];
+  const rows = section[0].match(/<tr\b[^>]*>[\s\S]*?<\/tr>/gi) || [];
   const contests = [];
   rows.forEach(function (row) {
-    const contestMatch = row.match(/<a\\b[^>]*href=["']\\/contests\\/([a-z0-9_-]+)(?:\\?[^"']*)?["'][^>]*>([\\s\\S]*?)<\\/a>/i);
-    const timeMatch = row.match(/<time\\b[^>]*datetime=["']([^"']+)["'][^>]*>/i);
+    const contestMatch = row.match(/<a\b[^>]*href=["']\/contests\/([a-z0-9_-]+)(?:\?[^"']*)?["'][^>]*>([\s\S]*?)<\/a>/i);
+    const timeMatch = row.match(/<time\b[^>]*datetime=["']([^"']+)["'][^>]*>/i);
     if (!contestMatch || !timeMatch) return;
     const id = contestMatch[1].toLowerCase();
     if (CONFIG.CONTEST_PREFIXES.length && !CONFIG.CONTEST_PREFIXES.some(function (prefix) {
@@ -112,11 +112,11 @@ function parseUpcomingContests_(html) {
 
     let timestamp = timeMatch[1].trim().replace(" ", "T");
     // Normalize offsets such as +0900 to +09:00.
-    timestamp = timestamp.replace(/([+-]\\d{2})(\\d{2})$/, "$1:$2");
+    timestamp = timestamp.replace(/([+-]\d{2})(\d{2})$/, "$1:$2");
     const startMs = Date.parse(timestamp);
     if (!Number.isFinite(startMs)) throw new Error("Invalid contest time for " + id);
 
-    const name = decodeHtml_(contestMatch[2].replace(/<[^>]*>/g, " ").replace(/\\s+/g, " ").trim());
+    const name = decodeHtml_(contestMatch[2].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim());
     contests.push({ id: id, name: name, startMs: startMs, url: "https://atcoder.jp/contests/" + id });
   });
   if (rows.length && !contests.length && !CONFIG.CONTEST_PREFIXES.length) {
